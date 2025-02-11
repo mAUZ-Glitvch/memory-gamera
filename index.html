@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #game-container {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+    <script async src="https://license.novelgames.com/games/game.js"></script>
+    <script>
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                let date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + value + expires + "; path=/";
+        }
+
+        function getCookie(name) {
+            let nameEQ = name + "=";
+            let ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function blockAccess() {
+            localStorage.setItem("gameBlocked", "true");
+            setCookie("gameBlocked", "true", 365); // Block for 1 year
+            document.body.innerHTML = "<h2>Access Denied</h2><p>You cannot replay the game.</p>";
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            if (localStorage.getItem("gameBlocked") === "true" || getCookie("gameBlocked") === "true") {
+                document.body.innerHTML = "<h2>Access Denied</h2><p>You cannot replay the game.</p>";
+            } else {
+                document.getElementById("game-container").style.display = "block";
+            }
+        });
+
+        // Observer to detect game over or mistake
+        const observer = new MutationObserver(() => {
+            if (document.body.innerText.includes("Game Over") || document.body.innerText.includes("Incorrect")) {
+                alert("Game Over! You cannot replay this game.");
+                blockAccess();
+                location.reload();
+            }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        // Block access on refresh or navigation attempts
+        window.addEventListener("beforeunload", function () {
+            if (localStorage.getItem("gameBlocked") === "true") {
+                setCookie("gameBlocked", "true", 365); 
+            }
+        });
+    </script>
+</head>
+<body>
+    <h2>Memory Game</h2>
+    <p>You can only play this game once. If you make a mistake, you will be permanently blocked.</p>
+
+    <div id="game-container">
+        <ins class="novelgames_cloudgame" data-game-short-name="patternmemory2" data-language="en"></ins>
+    </div>
+</body>
+</html>
+
+
+
